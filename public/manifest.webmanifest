@@ -1,0 +1,16 @@
+{
+  "name": "DesaConnect",
+  "short_name": "DesaConnect",
+  "description": "Platform GIS Desa Wisata Kabupaten Sleman",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F3E8",
+  "theme_color": "#C68C28",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
