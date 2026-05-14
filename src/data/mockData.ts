@@ -49,7 +49,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560001",
     clickThroughs: 342,
     photoColor: "#5b8c3e",
-    image: "https://picsum.photos/seed/pentingsari/600/300",
+    image: "https://nagantour.com/wp-content/uploads/2024/07/Desa-Wisata-Pentingsari-.webp",
   },
   {
     id: 2,
@@ -68,7 +68,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560002",
     clickThroughs: 287,
     photoColor: "#7a6b3a",
-    image: "https://picsum.photos/seed/brayut/600/300",
+    image: "https://cdn.bajabikes.eu/wp-content/uploads/2018/12/11185619/bali-fietstour.jpg",
   },
   {
     id: 3,
@@ -86,7 +86,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560003",
     clickThroughs: 156,
     photoColor: "#4a6e2e",
-    image: "https://picsum.photos/seed/tanjung/600/300",
+    image: "https://i.ytimg.com/vi/4uaBBi4YhUc/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCHggTnog3iiqY9WfsHljBptrkl3A",
   },
   {
     id: 4,
@@ -105,7 +105,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560004",
     clickThroughs: 210,
     photoColor: "#3d5e28",
-    image: "https://picsum.photos/seed/kelor/600/300",
+    image: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/17/51/ea/1e/kelor-is-the-best.jpg?w=1200&h=-1&s=1",
   },
   {
     id: 5,
@@ -124,7 +124,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560005",
     clickThroughs: 425,
     photoColor: "#6a8e4e",
-    image: "https://picsum.photos/seed/sambi/600/300",
+    image: "https://alodiatour.com/wp-content/uploads/2020/03/lokasi-desa-wisata-ledok-sambi.jpg",
   },
   {
     id: 6,
@@ -142,7 +142,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560006",
     clickThroughs: 89,
     photoColor: "#8a7b4a",
-    image: "https://picsum.photos/seed/kembangarum/600/300",
+    image: "https://visitingjogja.jogjaprov.go.id/wp-content/uploads/2017/01/desa-kembang-arum.jpg",
   },
   {
     id: 7,
@@ -161,7 +161,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560007",
     clickThroughs: 178,
     photoColor: "#5a7a3a",
-    image: "https://picsum.photos/seed/gamol/600/300",
+    image: "https://statik.tempo.co/data/2019/04/27/id_837471/837471_720.jpg",
   },
   {
     id: 8,
@@ -180,7 +180,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560008",
     clickThroughs: 512,
     photoColor: "#7a5c3e",
-    image: "https://picsum.photos/seed/nglanggeran/600/300",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNpzcbTf4Cfvsc_WrVQF6KAnIlOWDIsg2VcA&s",
   },
   {
     id: 9,
@@ -199,7 +199,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560009",
     clickThroughs: 195,
     photoColor: "#6b5a3e",
-    image: "https://picsum.photos/seed/bobung/600/300",
+    image: "https://cdn-jpr.jawapos.com/images/1/2024/11/29/Snapinstaapp_50594490_162463828072149_6016071656243023446_n_1080-3455870466.jpg",
   },
   {
     id: 10,
@@ -218,7 +218,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560010",
     clickThroughs: 310,
     photoColor: "#8b6914",
-    image: "https://picsum.photos/seed/bebeng/600/300",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSy25Uehyktfw2CGftc71D2iOwW3RhguDuHrQ&s",
   },
   {
     id: 11,
@@ -236,7 +236,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560011",
     clickThroughs: 134,
     photoColor: "#9e8c5a",
-    image: "https://picsum.photos/seed/kebonagung/600/300",
+    image: "https://www.lagilibur.com/images/s640/Bertani-di-Desa-Wisata-Kebonagung-Bantul.jpg",
   },
   {
     id: 12,
@@ -255,7 +255,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560012",
     clickThroughs: 220,
     photoColor: "#5e4a2e",
-    image: "https://picsum.photos/seed/tlogowero/600/300",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIDOZRyAYYlLQV6AXAtPqAT6_2DoI4K7PwDw&s",
   },
   {
     id: 13,
@@ -273,7 +273,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560013",
     clickThroughs: 67,
     photoColor: "#b07aa1",
-    image: "https://picsum.photos/seed/mulo/600/300",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTS7NtR7rUa1u7TpTf8tavtRHgYV5eupuOSLA&s",
   },
   {
     id: 14,
@@ -292,7 +292,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560014",
     clickThroughs: 268,
     photoColor: "#7a9e4a",
-    image: "https://picsum.photos/seed/lumbungrejo/600/300",
+    image: "https://images.bisnis.com/photos/2023/04/29/190575/antarafoto-desa-wisata-pepandungan-di-enrekang-280423-ap-3.jpg",
   },
   {
     id: 15,
@@ -311,7 +311,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560015",
     clickThroughs: 183,
     photoColor: "#c9a84c",
-    image: "https://picsum.photos/seed/mriyan/600/300",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNprHN4qeXZFC9_eKMVZe5FaR8z-iHy7PEug&s",
   },
   {
     id: 16,
@@ -329,7 +329,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560016",
     clickThroughs: 145,
     photoColor: "#6e9e8e",
-    image: "https://picsum.photos/seed/sinduharjo/600/300",
+    image: "https://thumb.viva.id/vivawisata/665x374/2026/04/30/69f366a4ed7f4-the-lost-spring-selandia-baru_wisata.jpg",
   },
   {
     id: 17,
@@ -348,7 +348,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560017",
     clickThroughs: 298,
     photoColor: "#4a5e6e",
-    image: "https://picsum.photos/seed/candibinangun/600/300",
+    image: "https://img.harianjogja.com/posts/2021/01/27/1061969/kampung-minapadi-samberembe.jpg",
   },
   {
     id: 18,
@@ -367,7 +367,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560018",
     clickThroughs: 112,
     photoColor: "#8b7355",
-    image: "https://picsum.photos/seed/margodadi/600/300",
+    image: "https://pbs.twimg.com/media/CT1PjvEVAAAgU0V.jpg",
   },
   {
     id: 19,
@@ -386,7 +386,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560019",
     clickThroughs: 623,
     photoColor: "#6e4a3a",
-    image: "https://picsum.photos/seed/wonokerto/600/300",
+    image: "https://ik.imagekit.io/pandooin/tr:pr-true/production/images/itinerary/jeep-tour-wanurejo/uf2SaSI7kZ80IR5QyDir46xFJ42C4L9eEIHOIOgG.jpg",
   },
   {
     id: 20,
@@ -404,7 +404,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560020",
     clickThroughs: 54,
     photoColor: "#a86e5a",
-    image: "https://picsum.photos/seed/pagerjurang/600/300",
+    image: "https://img-asset-01.visitbali.id/ZuZFtFhvu3T3D5eorNM7z0yGjjJWCusJqRfZKUiFzLY/fill/650/450/no/0/aHR0cHM6Ly92aXNpdGJhbGkuaWQvaW1hZ2VzL2RhdGEvMjAyMC9GZWIvMDYvNWUzYmQ0ZjMyMDQwYzY1MTIuanBn.jpg",
   },
   {
     id: 21,
@@ -423,7 +423,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560021",
     clickThroughs: 167,
     photoColor: "#8e6b4a",
-    image: "https://picsum.photos/seed/bokesan/600/300",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKqdghXOwL3NDNhc4v9SFPyri0lT6VStgMNg&s",
   },
   {
     id: 22,
@@ -442,7 +442,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560022",
     clickThroughs: 201,
     photoColor: "#4a8e8e",
-    image: "https://picsum.photos/seed/bringin/600/300",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOiPQp6NV4Ouj-ynDfCE__JfUjAlN-97W52g&s",
   },
   {
     id: 23,
@@ -461,7 +461,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560023",
     clickThroughs: 389,
     photoColor: "#5a4a3e",
-    image: "https://picsum.photos/seed/glagaharjo/600/300",
+    image: "https://assetd.kompas.id/5aMSkxjBoplIKoS_Uv0x1-tPgww=/1024x576/smart/filters:format(webp):quality(80)/https://kompas.id/wp-content/uploads/2018/05/65779893-4.jpg",
   },
   {
     id: 24,
@@ -480,7 +480,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560024",
     clickThroughs: 175,
     photoColor: "#7a6a5a",
-    image: "https://picsum.photos/seed/hargobinangun/600/300",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPW86hK7mnM8HlyNJKLJr2uiu9lLu3hK2GxA&s",
   },
   {
     id: 25,
@@ -499,7 +499,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560025",
     clickThroughs: 256,
     photoColor: "#3a7a3a",
-    image: "https://picsum.photos/seed/girikerto/600/300",
+    image: "https://thumb.viva.co.id/media/frontend/thumbs3/2019/02/08/5c5d5996a3826-keindahan-desa-wisata-girikerto-di-lereng-gunung-lawu-ngawi-jawa-timur_663_372.jpg",
   },
   {
     id: 26,
@@ -517,7 +517,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560026",
     clickThroughs: 142,
     photoColor: "#7a8a3a",
-    image: "https://picsum.photos/seed/purwobinangun/600/300",
+    image: "https://www.purwobinangun.desa.id/assets/front/css/images/latar_website.jpg?v2fea19cb8b4f08ffe6b24e38cc2e0829",
   },
   {
     id: 27,
@@ -535,7 +535,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560027",
     clickThroughs: 43,
     photoColor: "#9e5a6e",
-    image: "https://picsum.photos/seed/wonorejo/600/300",
+    image: "https://farm4.static.flickr.com/3562/3378604968_06a8eb9ddb_o.jpg",
   },
   {
     id: 28,
@@ -554,7 +554,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560028",
     clickThroughs: 189,
     photoColor: "#6a5a8e",
-    image: "https://picsum.photos/seed/tirtomartani/600/300",
+    image: "https://cdn.antaranews.com/cache/1200x800/2017/05/201705080878.jpg",
   },
   {
     id: 29,
@@ -573,7 +573,7 @@ export const villages: Village[] = [
     whatsapp: "6281234560029",
     clickThroughs: 234,
     photoColor: "#5a8a6a",
-    image: "https://picsum.photos/seed/minomartani/600/300",
+    image: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhy6JA-wOATO_93ltB4g1MeJim7IbQntvnQAbD5sCkTUsjnICyTtjLAbk3tnfV9sbknhtEX_vjlZFOBU_2g9LYY3Tk1N7JtL_0Sc41koD1W5GsfVzkfX3_Z15-bJD5q5vxmr3RKJ-55NOg/s1600/IMG_20170628_173822_HDR.jpg",
   },
   {
     id: 30,
@@ -592,9 +592,16 @@ export const villages: Village[] = [
     whatsapp: "6281234560030",
     clickThroughs: 478,
     photoColor: "#5e3a2a",
-    image: "https://picsum.photos/seed/cangkringan/600/300",
+    image: "https://visitingjogja.jogjaprov.go.id/wp-content/uploads/2017/12/pentingsari.jpg",
   },
 ];
+
+export function addVillage(v: Omit<Village, 'id' | 'clickThroughs'>): Village {
+  const id = villages.length > 0 ? Math.max(...villages.map(x => x.id)) + 1 : 1
+  const newVillage: Village = { ...v, id, clickThroughs: 0 }
+  villages.push(newVillage)
+  return newVillage
+}
 
 export const auditLog: AuditEntry[] = [
   { actorId: "pokdarwis-001", action: "UPDATE_SEASON", timestamp: "2026-05-12 14:23:01", targetId: "Musim Panen — Pentingsari", targetEn: "Harvest Season — Pentingsari" },

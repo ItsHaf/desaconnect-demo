@@ -861,3 +861,58 @@ button, select, input, textarea {
   border-color: var(--gold);
   background: #fef9ed;
 }
+
+.mode-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: rgba(0,0,0,0.05);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-tab:hover {
+  color: var(--dark);
+  background: rgba(255,255,255,0.6);
+}
+
+.mode-tab.active {
+  background: var(--green);
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+
+.success-notice {
+  background: #e6f4d8;
+  border: 1px solid #a3d977;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+  color: #2d5a1e;
+  font-weight: 600;
+}
+
+.validation-error {
+  background: #fde8e8;
+  border: 1px solid #f5c6cb;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+  color: var(--danger);
+  font-weight: 600;
+}
