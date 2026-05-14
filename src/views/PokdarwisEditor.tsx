@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { useLang } from '../components/LangProvider'
+import { useData } from '../components/DataProvider'
 import { tr } from '../data/i18n'
-import { villages, addVillage, type Activity, type Village } from '../data/mockData'
+import { type Activity, type Village } from '../data/mockData'
 import ResponsiveImage, { makeThumbSvg } from '../components/ResponsiveImage'
 
 type EditorMode = 'edit' | 'add'
@@ -25,6 +26,16 @@ interface PhotoItem {
 
 function actToEdit(a: Activity): EditableActivity {
   return { nameId: a.nameId, nameEn: a.nameEn, price: a.price, durationId: a.durationId, durationEn: a.durationEn }
+}
+
+function editToAct(a: EditableActivity): Activity {
+  return {
+    nameId: a.nameId || a.nameEn,
+    nameEn: a.nameEn || a.nameId,
+    price: a.price || 'Rp 0',
+    durationId: a.durationId || a.durationEn,
+    durationEn: a.durationEn || a.durationId,
+  }
 }
 
 function villageToPhotos(v: Village): PhotoItem[] {
@@ -52,26 +63,29 @@ function FlyToVillage({ lat, lng, zoom }: { lat: number; lng: number; zoom: numb
 
 const EMPTY_ACTIVITY: EditableActivity = { nameId: '', nameEn: '', price: '', durationId: '', durationEn: '' }
 
+function shortName(name: string): string {
+  return name.replace('Desa Wisata ', '')
+}
+
 export default function PokdarwisEditor() {
   const { lang } = useLang()
+  const { villages, updateVillage, addVillage, addAuditEntry } = useData()
   const [mode, setMode] = useState<EditorMode>('edit')
   const [offline, setOffline] = useState(false)
   const [queued, setQueued] = useState(false)
-  const [selectedId, setSelectedId] = useState(villages[0].id)
+  const [selectedId, setSelectedId] = useState(villages[0]?.id ?? 1)
   const [dirty, setDirty] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
 
-  // Edit-mode state
   const village = villages.find((v) => v.id === selectedId) ?? villages[0]
-  const [villageName, setVillageName] = useState(village.name)
-  const [lat, setLat] = useState(String(village.lat))
-  const [lng, setLng] = useState(String(village.lng))
-  const [inSeason, setInSeason] = useState(village.inSeason)
-  const [wheelchair, setWheelchair] = useState(village.wheelchairAccess)
-  const [activities, setActivities] = useState<EditableActivity[]>(village.activities.map(actToEdit))
-  const [photos, setPhotos] = useState<PhotoItem[]>(villageToPhotos(village))
+  const [villageName, setVillageName] = useState(village?.name ?? '')
+  const [lat, setLat] = useState(String(village?.lat ?? -7.7))
+  const [lng, setLng] = useState(String(village?.lng ?? 110.36))
+  const [inSeason, setInSeason] = useState(village?.inSeason ?? false)
+  const [wheelchair, setWheelchair] = useState(village?.wheelchairAccess ?? false)
+  const [activities, setActivities] = useState<EditableActivity[]>(village?.activities.map(actToEdit) ?? [])
+  const [photos, setPhotos] = useState<PhotoItem[]>(village ? villageToPhotos(village) : [])
 
-  // Add-mode state
   const [newName, setNewName] = useState('')
   const [newDescId, setNewDescId] = useState('')
   const [newDescEn, setNewDescEn] = useState('')
@@ -161,9 +175,33 @@ export default function PokdarwisEditor() {
   const handleSave = () => {
     if (offline) {
       setQueued(true)
-    } else {
-      setDirty(false)
+      return
     }
+
+    const numLat = parseFloat(lat) || (village?.lat ?? -7.7)
+    const numLng = parseFloat(lng) || (village?.lng ?? 110.36)
+    const mappedActivities = activities.filter(a => a.nameId.trim() || a.nameEn.trim()).map(editToAct)
+
+    updateVillage(selectedId, {
+      name: villageName,
+      lat: numLat,
+      lng: numLng,
+      inSeason,
+      wheelchairAccess: wheelchair,
+      activities: mappedActivities,
+      hasActivities: mappedActivities.length > 0,
+    })
+
+    const sn = shortName(villageName)
+    addAuditEntry({
+      actorId: 'pokdarwis-session',
+      action: 'UPDATE_VILLAGE',
+      targetId: `Perubahan — ${sn}`,
+      targetEn: `Village Update — ${sn}`,
+    })
+
+    setDirty(false)
+    setSuccessMsg(lang === 'en' ? 'Village updated successfully!' : 'Desa berhasil diperbarui!')
   }
 
   const handleAddVillage = () => {
@@ -172,28 +210,39 @@ export default function PokdarwisEditor() {
       setValidationError(tr('fillRequired', lang))
       return
     }
+
+    if (offline) {
+      setQueued(true)
+      return
+    }
+
     const numLat = parseFloat(newLat) || -7.700
     const numLng = parseFloat(newLng) || 110.360
-    addVillage({
+    const mappedActivities = newActivities.filter(a => a.nameId.trim() || a.nameEn.trim()).map(editToAct)
+
+    const created = addVillage({
       name: newName.trim(),
       descId: newDescId.trim(),
       descEn: newDescEn.trim(),
       lat: numLat,
       lng: numLng,
       inSeason: newInSeason,
-      hasActivities: newActivities.length > 0,
+      hasActivities: mappedActivities.length > 0,
       wheelchairAccess: newWheelchair,
-      activities: newActivities.filter(a => a.nameId.trim() || a.nameEn.trim()).map(a => ({
-        nameId: a.nameId || a.nameEn,
-        nameEn: a.nameEn || a.nameId,
-        price: a.price || 'Rp 0',
-        durationId: a.durationId || a.durationEn,
-        durationEn: a.durationEn || a.durationId,
-      })),
+      activities: mappedActivities,
       whatsapp: newWhatsapp.trim(),
       photoColor: '#5b8c3e',
       image: newImage.trim() || `https://picsum.photos/seed/${newName.trim().toLowerCase().replace(/\s+/g, '')}/600/300`,
     })
+
+    const sn = shortName(newName.trim())
+    addAuditEntry({
+      actorId: 'pokdarwis-session',
+      action: 'REGISTER_VILLAGE',
+      targetId: `Registrasi — ${sn}`,
+      targetEn: `Village Registration — ${sn}`,
+    })
+
     setSuccessMsg(tr('villageAdded', lang))
     setNewName('')
     setNewDescId('')
@@ -205,11 +254,15 @@ export default function PokdarwisEditor() {
     setNewWhatsapp('')
     setNewImage('')
     setNewActivities([])
+
+    setSelectedId(created.id)
+    setMode('edit')
+    selectVillage(created.id)
   }
 
   const totalActivities = activities.length
-  const numLat = parseFloat(lat) || village.lat
-  const numLng = parseFloat(lng) || village.lng
+  const numLat = parseFloat(lat) || (village?.lat ?? -7.7)
+  const numLng = parseFloat(lng) || (village?.lng ?? 110.36)
   const newNumLat = parseFloat(newLat) || -7.700
   const newNumLng = parseFloat(newLng) || 110.360
 

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { MapContainer, TileLayer, Polygon, Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { useLang } from '../components/LangProvider'
+import { useData } from '../components/DataProvider'
 import { tr, getMonths, type TranslationKey } from '../data/i18n'
 
 const DEFAULT_CENTER: [number, number] = [-7.678, 110.385]
@@ -39,9 +40,16 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
   return null
 }
 
-function DraggableMarker({ position, onDragEnd }: { position: [number, number]; onDragEnd: (lat: number, lng: number) => void }) {
+function DraggableMarker({ position, onDrag, onDragEnd }: { position: [number, number]; onDrag: (lat: number, lng: number) => void; onDragEnd: (lat: number, lng: number) => void }) {
   const markerRef = useRef<L.Marker>(null)
   const eventHandlers = {
+    drag() {
+      const marker = markerRef.current
+      if (marker) {
+        const pos = marker.getLatLng()
+        onDrag(pos.lat, pos.lng)
+      }
+    },
     dragend() {
       const marker = markerRef.current
       if (marker) {
@@ -64,8 +72,10 @@ function DraggableMarker({ position, onDragEnd }: { position: [number, number]; 
 
 export default function FarmerPlotRegistration() {
   const { lang } = useLang()
+  const { addAuditEntry } = useData()
   const [offline, setOffline] = useState(false)
   const [queued, setQueued] = useState(false)
+  const [successMsg, setSuccessMsg] = useState('')
   const [commodity, setCommodity] = useState<CommodityKey>('Salak')
   const [startMonth, setStartMonth] = useState('5')
   const [endMonth, setEndMonth] = useState('8')
@@ -74,10 +84,23 @@ export default function FarmerPlotRegistration() {
 
   const months = getMonths(lang)
 
+  const commodityLabel = (key: CommodityKey) => tr(COMMODITY_KEYS[key] as TranslationKey, lang)
+
   const handleSave = () => {
     if (offline) {
       setQueued(true)
+      return
     }
+
+    const label = commodityLabel(commodity)
+    addAuditEntry({
+      actorId: 'farmer-session',
+      action: 'REGISTER_PLOT',
+      targetId: `Lahan ${label}, Sleman`,
+      targetEn: `${label} Plot, Sleman`,
+    })
+
+    setSuccessMsg(lang === 'en' ? 'Plot registered successfully!' : 'Lahan berhasil didaftarkan!')
   }
 
   const addPoint = (lat: number, lng: number) => {
@@ -116,6 +139,12 @@ export default function FarmerPlotRegistration() {
         />
       </div>
 
+      {successMsg && (
+        <div className="success-notice">
+          {successMsg}
+        </div>
+      )}
+
       <div className="map-draw-area">
         <MapContainer
           center={DEFAULT_CENTER}
@@ -139,6 +168,7 @@ export default function FarmerPlotRegistration() {
             <DraggableMarker
               key={i}
               position={p}
+              onDrag={(lat, lng) => updatePoint(i, lat, lng)}
               onDragEnd={(lat, lng) => updatePoint(i, lat, lng)}
             />
           ))}
@@ -171,7 +201,7 @@ export default function FarmerPlotRegistration() {
           <select value={commodity} onChange={(e) => setCommodity(e.target.value as CommodityKey)}>
             {COMMODITIES.map((key) => (
               <option key={key} value={key}>
-                {tr(COMMODITY_KEYS[key] as TranslationKey, lang)}
+                {commodityLabel(key)}
               </option>
             ))}
           </select>

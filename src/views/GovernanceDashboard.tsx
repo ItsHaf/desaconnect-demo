@@ -1,4 +1,4 @@
-import { villages, auditLog } from '../data/mockData'
+import { useData } from '../components/DataProvider'
 import { useLang } from '../components/LangProvider'
 import { tr, type Lang } from '../data/i18n'
 
@@ -7,6 +7,7 @@ function getTarget(entry: { targetId: string; targetEn: string }, lang: Lang) {
 }
 
 export default function GovernanceDashboard() {
+  const { villages, auditLog } = useData()
   const { lang } = useLang()
 
   const top5 = [...villages]

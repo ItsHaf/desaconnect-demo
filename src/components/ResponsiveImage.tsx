@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { villages } from '../data/mockData'
+import { useData } from './DataProvider'
 
 interface Props {
   villageId: number
@@ -36,6 +36,7 @@ function makeFallbackSvg(id: number, name: string): string {
 }
 
 export default function ResponsiveImage({ villageId, villageName, className, style }: Props) {
+  const { villages } = useData()
   const village = villages.find((v) => v.id === villageId)
   const fallback = useMemo(() => makeFallbackSvg(villageId, villageName), [villageId, villageName])
   const realSrc = village?.image || fallback

@@ -31,7 +31,7 @@ export interface AuditEntry {
   targetEn: string;
 }
 
-export const villages: Village[] = [
+export const initialVillages: Village[] = [
   {
     id: 1,
     name: "Desa Wisata Pentingsari",
@@ -596,14 +596,7 @@ export const villages: Village[] = [
   },
 ];
 
-export function addVillage(v: Omit<Village, 'id' | 'clickThroughs'>): Village {
-  const id = villages.length > 0 ? Math.max(...villages.map(x => x.id)) + 1 : 1
-  const newVillage: Village = { ...v, id, clickThroughs: 0 }
-  villages.push(newVillage)
-  return newVillage
-}
-
-export const auditLog: AuditEntry[] = [
+export const initialAuditLog: AuditEntry[] = [
   { actorId: "pokdarwis-001", action: "UPDATE_SEASON", timestamp: "2026-05-12 14:23:01", targetId: "Musim Panen — Pentingsari", targetEn: "Harvest Season — Pentingsari" },
   { actorId: "farmer-042", action: "REGISTER_PLOT", timestamp: "2026-05-12 13:15:44", targetId: "Lahan Salak, Glagaharjo", targetEn: "Snakefruit Plot, Glagaharjo" },
   { actorId: "pokdarwis-003", action: "ADD_ACTIVITY", timestamp: "2026-05-12 12:08:30", targetId: "Aktivitas Baru — Sambi", targetEn: "New Activity — Sambi" },

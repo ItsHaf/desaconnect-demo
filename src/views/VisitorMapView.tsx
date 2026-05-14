@@ -1,7 +1,8 @@
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import { useState } from 'react'
-import { villages, type Village } from '../data/mockData'
+import { useData } from '../components/DataProvider'
+import { type Village } from '../data/mockData'
 import { useLang } from '../components/LangProvider'
 import { tr, type Lang } from '../data/i18n'
 import ResponsiveImage from '../components/ResponsiveImage'
@@ -26,6 +27,7 @@ interface Filters {
 }
 
 export default function VisitorMapView() {
+  const { villages } = useData()
   const [selected, setSelected] = useState<Village | null>(null)
   const [filters, setFilters] = useState<Filters>({
     inSeason: false,
