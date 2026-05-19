@@ -666,7 +666,7 @@ export default function PokdarwisEditor() {
                 {photos.map((p) => (
                   <div key={p.id} className="photo-thumb-wrap">
                     {p.isNew ? (
-                      <img className="photo-thumb" src={makeThumbSvg(`${selectedId}-${p.id}`)} alt="New" />
+                      <img className="photo-thumb" src={makeThumbSvg(`${selectedId}-${p.id}`)} alt={lang === 'en' ? `New photo placeholder for ${villageName}` : `Placeholder foto baru untuk ${villageName}`} />
                     ) : (
                       <ResponsiveImage villageId={p.villageId} villageName={p.villageName} className="photo-thumb" />
                     )}
