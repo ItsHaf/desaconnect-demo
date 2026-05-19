@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { LangProvider, useLang } from './components/LangProvider'
-import { VillagesProvider } from './components/VillagesProvider'
+import { VillagesProvider, useVillages } from './components/VillagesProvider'
 import { PlotsProvider } from './components/PlotsProvider'
 import { tr } from './data/i18n'
 import VisitorMapView from './views/VisitorMapView'
@@ -29,6 +29,8 @@ const roleDescKeys = {
 function AppInner() {
   const [role, setRole] = useState<Role>('Visitor')
   const { lang, toggleLang } = useLang()
+  const { pendingVillageActions } = useVillages()
+  const pendingCount = pendingVillageActions.length
 
   return (
     <>
@@ -49,6 +51,9 @@ function AppInner() {
                 onClick={() => setRole(r)}
               >
                 {tr(roleKeys[r], lang)}
+                {r === 'Pokdarwis' && pendingCount > 0 && (
+                  <span className="pending-badge">{pendingCount}</span>
+                )}
               </button>
             ))}
           </div>

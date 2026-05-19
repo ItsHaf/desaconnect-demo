@@ -104,6 +104,27 @@ button, select, input, textarea {
   color: var(--green);
 }
 
+.role-btn {
+  position: relative;
+}
+
+.pending-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #e53e3e;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 8px;
+  padding: 0 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
 .app-body {
   height: calc(100% - 56px - 32px);
   overflow-y: auto;

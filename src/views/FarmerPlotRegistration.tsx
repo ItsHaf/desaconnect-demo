@@ -91,10 +91,8 @@ function DraggableMarker({
 
 export default function FarmerPlotRegistration() {
   const { lang } = useLang()
-  const { plots, addPlot, removePlotsByFarmer } = usePlots()
+  const { plots, addPlot, removePlotsByFarmer, pendingPlots, addPendingPlot, syncPendingPlots, offlineMode, setOfflineMode } = usePlots()
   const { addAuditEntry } = useVillages()
-  const [offline, setOffline] = useState(false)
-  const [queued, setQueued] = useState(false)
   const [saved, setSaved] = useState(false)
   const [rightsMsg, setRightsMsg] = useState('')
   const [commodity, setCommodity] = useState<CommodityKey>('Salak')
@@ -102,7 +100,7 @@ export default function FarmerPlotRegistration() {
   const [endMonth, setEndMonth] = useState('8')
   const [visibility, setVisibility] = useState<'public' | 'private'>('public')
   const [points, setPoints] = useState<[number, number][]>(DEFAULT_POINTS)
-  const pendingPlot = useRef<FarmerPlot | null>(null)
+  const queued = pendingPlots.length > 0
 
   const months = getMonths(lang)
 
@@ -125,9 +123,8 @@ export default function FarmerPlotRegistration() {
     if (points.length < 3) return
     const plot = buildPlot()
 
-    if (offline) {
-      pendingPlot.current = plot
-      setQueued(true)
+    if (offlineMode) {
+      addPendingPlot(plot)
       setSaved(true)
     } else {
       addPlot(plot)
@@ -142,23 +139,20 @@ export default function FarmerPlotRegistration() {
   }
 
   const toggleOffline = () => {
-    const goingOnline = offline
-    setOffline(!offline)
+    const goingOnline = offlineMode
+    setOfflineMode(!offlineMode)
 
-    if (goingOnline && pendingPlot.current) {
-      const syncedPlot = pendingPlot.current
-      addPlot(syncedPlot)
-      addAuditEntry({
-        actorId: 'farmer-session',
-        action: 'REGISTER_PLOT',
-        targetId: `Lahan ${syncedPlot.commodity}, Sleman`,
-        targetEn: `${syncedPlot.commodityEn} Plot, Sleman`,
-      })
-      pendingPlot.current = null
-      setQueued(false)
+    if (goingOnline && pendingPlots.length > 0) {
+      syncPendingPlots()
+      for (const plot of pendingPlots) {
+        addAuditEntry({
+          actorId: 'farmer-session',
+          action: 'REGISTER_PLOT',
+          targetId: `Lahan ${plot.commodity}, Sleman`,
+          targetEn: `${plot.commodityEn} Plot, Sleman`,
+        })
+      }
       setSaved(true)
-    } else if (goingOnline) {
-      setQueued(false)
     }
   }
 
@@ -187,7 +181,7 @@ export default function FarmerPlotRegistration() {
   }
 
   const exportOwnData = () => {
-    const data = ownPlots.length > 0 ? ownPlots : (pendingPlot.current ? [pendingPlot.current] : [])
+    const data = ownPlots.length > 0 ? ownPlots : (pendingPlots.length > 0 ? pendingPlots : [])
     downloadJson('desaconnect_my_plots.json', data)
     addAuditEntry({
       actorId: 'farmer-session',
@@ -201,8 +195,6 @@ export default function FarmerPlotRegistration() {
   const deleteOwnData = () => {
     if (!window.confirm(lang === 'en' ? 'Delete all plots you registered in this session?' : 'Hapus semua lahan yang Anda daftarkan pada sesi ini?')) return
     removePlotsByFarmer('farmer-me')
-    pendingPlot.current = null
-    setQueued(false)
     setSaved(false)
     addAuditEntry({
       actorId: 'farmer-session',
@@ -218,9 +210,9 @@ export default function FarmerPlotRegistration() {
       <h2>{tr('farmerTitle', lang)}</h2>
       <p className="screen-desc">{tr('farmerDesc', lang)}</p>
 
-      <div className={`offline-sim ${offline ? 'active' : ''}`}>
+      <div className={`offline-sim ${offlineMode ? 'active' : ''}`}>
         <span className="offline-sim-label">{tr('offlineSim', lang)}</span>
-        <button className={`toggle ${offline ? 'on' : ''}`} onClick={toggleOffline} aria-label="Toggle offline simulation" />
+        <button className={`toggle ${offlineMode ? 'on' : ''}`} onClick={toggleOffline} aria-label="Toggle offlineMode simulation" />
       </div>
 
       <div className="map-draw-area">
@@ -286,8 +278,8 @@ export default function FarmerPlotRegistration() {
         </div>
       </div>
 
-      <button className={`btn-primary ${offline ? 'offline' : ''} ${saved ? '' : 'dirty'}`} onClick={handleSave}>
-        {offline ? tr('savedLocal', lang) : saved ? tr('save', lang) : lang === 'en' ? 'Save Plot' : 'Simpan Lahan'}
+      <button className={`btn-primary ${offlineMode ? 'offlineMode' : ''} ${saved ? '' : 'dirty'}`} onClick={handleSave}>
+        {offlineMode ? tr('savedLocal', lang) : saved ? tr('save', lang) : lang === 'en' ? 'Save Plot' : 'Simpan Lahan'}
       </button>
 
       {queued && (
@@ -297,7 +289,7 @@ export default function FarmerPlotRegistration() {
         </div>
       )}
 
-      {saved && !queued && !offline && (
+      {saved && !queued && !offlineMode && (
         <div className="offline-notice" style={{ background: '#d4edda', borderColor: '#a3d9a5', color: '#155724' }}>
           <span className="dot" style={{ background: '#28a745' }} />
           {lang === 'en' ? 'Plot saved! Switch to Visitor view to see it on the map.' : 'Lahan tersimpan! Beralih ke tampilan Pengunjung untuk melihatnya di peta.'}

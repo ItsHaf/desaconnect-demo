@@ -83,14 +83,6 @@ const COMMODITY_EN = {
 } as const
 type CommodityKey = keyof typeof COMMODITY_EN
 
-interface PendingVillageAction {
-  type: 'update' | 'add'
-  villageId?: number
-  village?: Village
-  changes?: Partial<Village>
-  auditEntries: Array<Omit<AuditEntry, 'timestamp'>>
-}
-
 function PlotMapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
   useMapEvents({
     click(e) {
@@ -146,15 +138,13 @@ function shortName(name: string): string {
 
 export default function PokdarwisEditor() {
   const { lang } = useLang()
-  const { villages, nextId, updateVillage, addVillage, removeVillage, addAuditEntry } = useVillages()
+  const { villages, nextId, updateVillage, addVillage, removeVillage, addAuditEntry, pendingVillageActions, addPendingVillageAction, syncPendingVillageActions, offlineMode, setOfflineMode } = useVillages()
   const { addPlot } = usePlots()
   const [mode, setMode] = useState<EditorMode>('edit')
-  const [offline, setOffline] = useState(false)
-  const [queued, setQueued] = useState(false)
   const [selectedId, setSelectedId] = useState(villages[0]?.id ?? 1)
   const [dirty, setDirty] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
-  const pendingActions = useRef<PendingVillageAction[]>([])
+  const queued = pendingVillageActions.length > 0
 
   const village = villages.find((v) => v.id === selectedId) ?? villages[0]
   const [villageName, setVillageName] = useState(village?.name ?? '')
@@ -211,28 +201,12 @@ export default function PokdarwisEditor() {
     if (m === 'edit') selectVillage(selectedId)
   }
 
-  const syncPendingActions = () => {
-    for (const action of pendingActions.current) {
-      if (action.type === 'update' && action.villageId && action.changes) {
-        updateVillage(action.villageId, action.changes)
-      }
-      if (action.type === 'add' && action.village) {
-        addVillage(action.village)
-      }
-      action.auditEntries.forEach((entry) => addAuditEntry(entry))
-    }
-    pendingActions.current = []
-    setQueued(false)
-    setSuccessMsg(tr('syncComplete', lang))
-  }
-
   const toggleOffline = () => {
-    const goingOnline = offline
-    setOffline(!offline)
-    if (goingOnline && pendingActions.current.length > 0) {
-      syncPendingActions()
-    } else if (goingOnline) {
-      setQueued(false)
+    const goingOnline = offlineMode
+    setOfflineMode(!offlineMode)
+    if (goingOnline && pendingVillageActions.length > 0) {
+      syncPendingVillageActions()
+      setSuccessMsg(tr('syncComplete', lang))
     }
   }
 
@@ -311,9 +285,8 @@ export default function PokdarwisEditor() {
       targetEn: `Village Update — ${sn}`,
     }
 
-    if (offline) {
-      pendingActions.current.push({ type: 'update', villageId: selectedId, changes, auditEntries: [auditEntry] })
-      setQueued(true)
+    if (offlineMode) {
+      addPendingVillageAction({ type: 'update', villageId: selectedId, changes, auditEntries: [auditEntry] })
       setDirty(false)
       setSuccessMsg(tr('savedLocal', lang))
       return
@@ -336,7 +309,7 @@ export default function PokdarwisEditor() {
     const numLat = parseFloat(newLat) || -7.700
     const numLng = parseFloat(newLng) || 110.360
     const mappedActivities = newActivities.filter(a => a.nameId.trim() || a.nameEn.trim()).map(editToAct)
-    const pendingAddCount = pendingActions.current.filter((action) => action.type === 'add').length
+    const pendingAddCount = pendingVillageActions.filter((action) => action.type === 'add').length
 
     const created: Village = {
       id: nextId + pendingAddCount,
@@ -369,9 +342,8 @@ export default function PokdarwisEditor() {
       targetEn: `Musyawarah Consent — ${sn}`,
     }
 
-    if (offline) {
-      pendingActions.current.push({ type: 'add', village: created, auditEntries: [registerAudit, consentAudit] })
-      setQueued(true)
+    if (offlineMode) {
+      addPendingVillageAction({ type: 'add', village: created, auditEntries: [registerAudit, consentAudit] })
       setSuccessMsg(tr('savedLocal', lang))
     } else {
       addVillage(created)
@@ -391,7 +363,7 @@ export default function PokdarwisEditor() {
     setNewActivities([])
     setNewConsent(false)
 
-    if (!offline) {
+    if (!offlineMode) {
       setSelectedId(created.id)
       setMode('edit')
       setVillageName(created.name)
@@ -508,14 +480,14 @@ export default function PokdarwisEditor() {
       <h2>{tr('pokdarwisTitle', lang)}</h2>
       <p className="screen-desc">{tr('pokdarwisDesc', lang)}</p>
 
-      <div className={`offline-sim ${offline ? 'active' : ''}`}>
+      <div className={`offline-sim ${offlineMode ? 'active' : ''}`}>
         <span className="offline-sim-label">
           {tr('offlineSim', lang)}
         </span>
         <button
-          className={`toggle ${offline ? 'on' : ''}`}
+          className={`toggle ${offlineMode ? 'on' : ''}`}
           onClick={toggleOffline}
-          aria-label="Toggle offline simulation"
+          aria-label="Toggle offlineMode simulation"
         />
       </div>
 
@@ -722,10 +694,10 @@ export default function PokdarwisEditor() {
           </div>
 
           <button
-            className={`btn-primary ${offline ? 'offline' : ''} ${dirty && !offline ? 'dirty' : ''}`}
+            className={`btn-primary ${offlineMode ? 'offlineMode' : ''} ${dirty && !offlineMode ? 'dirty' : ''}`}
             onClick={handleSave}
           >
-            {offline
+            {offlineMode
               ? tr('savedLocal', lang)
               : dirty
                 ? (lang === 'en' ? 'Save Changes' : 'Simpan Perubahan')
@@ -943,12 +915,12 @@ export default function PokdarwisEditor() {
           </div>
 
           <button
-            className={`btn-primary ${offline ? 'offline' : 'dirty'}`}
+            className={`btn-primary ${offlineMode ? 'offlineMode' : 'dirty'}`}
             onClick={handleAddVillage}
             disabled={!newName.trim() || !newConsent}
             style={{ opacity: !newName.trim() || !newConsent ? 0.5 : 1 }}
           >
-            {offline
+            {offlineMode
               ? tr('savedLocal', lang)
               : (lang === 'en' ? 'Register Village' : 'Daftarkan Desa')}
           </button>
