@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { useData } from './DataProvider'
+import { useEffect, useMemo, useState } from 'react'
+import { useVillages } from './VillagesProvider'
 
 interface Props {
   villageId: number
@@ -16,6 +16,8 @@ const COLORS = [
   '#8e6b4a', '#4a8e8e', '#5a4a3e', '#7a6a5a', '#3a7a3a',
   '#7a8a3a', '#9e5a6e', '#6a5a8e', '#5a8a6a', '#5e3a2a',
 ]
+
+const loadedImages = new Set<string>()
 
 function makeFallbackSvg(id: number, name: string): string {
   const color = COLORS[(id - 1) % COLORS.length]
@@ -36,12 +38,38 @@ function makeFallbackSvg(id: number, name: string): string {
 }
 
 export default function ResponsiveImage({ villageId, villageName, className, style }: Props) {
-  const { villages } = useData()
+  const { villages } = useVillages()
   const village = villages.find((v) => v.id === villageId)
   const fallback = useMemo(() => makeFallbackSvg(villageId, villageName), [villageId, villageName])
   const realSrc = village?.image || fallback
-  const [failedId, setFailedId] = useState<number | null>(null)
-  const src = failedId === villageId ? fallback : realSrc
+  const canDisplayImmediately = !realSrc || realSrc.startsWith('data:image') || loadedImages.has(realSrc)
+  const [resolvedSrc, setResolvedSrc] = useState(realSrc)
+
+  useEffect(() => {
+    let cancelled = false
+
+    if (canDisplayImmediately) {
+      return () => {
+        cancelled = true
+      }
+    }
+
+    const img = new Image()
+    img.src = realSrc
+    img.onload = () => {
+      loadedImages.add(realSrc)
+      if (!cancelled) setResolvedSrc(realSrc)
+    }
+    img.onerror = () => {
+      if (!cancelled) setResolvedSrc(fallback)
+    }
+
+    return () => {
+      cancelled = true
+    }
+  }, [canDisplayImmediately, fallback, realSrc])
+
+  const src = canDisplayImmediately ? realSrc || fallback : resolvedSrc
 
   return (
     <div className={className} style={{ position: 'relative', overflow: 'hidden', ...style }}>
@@ -49,7 +77,9 @@ export default function ResponsiveImage({ villageId, villageName, className, sty
         src={src}
         alt={villageName}
         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-        onError={() => setFailedId(villageId)}
+        loading="eager"
+        decoding="async"
+        onError={() => setResolvedSrc(fallback)}
       />
     </div>
   )

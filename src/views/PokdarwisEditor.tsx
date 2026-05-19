@@ -1,13 +1,14 @@
-import { useState } from 'react'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { useRef, useState } from 'react'
+import { MapContainer, TileLayer, Marker, Polygon, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { useLang } from '../components/LangProvider'
-import { useData } from '../components/DataProvider'
-import { tr } from '../data/i18n'
-import { type Activity, type Village } from '../data/mockData'
+import { useVillages } from '../components/VillagesProvider'
+import { usePlots } from '../components/PlotsProvider'
+import { getMonths, tr, type TranslationKey } from '../data/i18n'
+import { type Activity, type AuditEntry, type FarmerPlot, type Village } from '../data/mockData'
 import ResponsiveImage, { makeThumbSvg } from '../components/ResponsiveImage'
 
-type EditorMode = 'edit' | 'add'
+type EditorMode = 'edit' | 'add' | 'delegate'
 
 interface EditableActivity {
   nameId: string
@@ -62,6 +63,82 @@ function FlyToVillage({ lat, lng, zoom }: { lat: number; lng: number; zoom: numb
 }
 
 const EMPTY_ACTIVITY: EditableActivity = { nameId: '', nameEn: '', price: '', durationId: '', durationEn: '' }
+const DEFAULT_POINTS: [number, number][] = [
+  [-7.682, 110.382],
+  [-7.678, 110.39],
+  [-7.674, 110.387],
+  [-7.676, 110.379],
+]
+const plotPointIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:12px;height:12px;background:#4A7C2E;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>',
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
+})
+const COMMODITY_EN = {
+  Salak: 'Snakefruit (Salak)',
+  Cabai: 'Chili (Cabai)',
+  Padi: 'Rice (Padi)',
+  Jagung: 'Corn (Jagung)',
+} as const
+type CommodityKey = keyof typeof COMMODITY_EN
+
+interface PendingVillageAction {
+  type: 'update' | 'add'
+  villageId?: number
+  village?: Village
+  changes?: Partial<Village>
+  auditEntries: Array<Omit<AuditEntry, 'timestamp'>>
+}
+
+function PlotMapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng.lat, e.latlng.lng)
+    },
+  })
+  return null
+}
+
+function PlotDraggableMarker({
+  position,
+  onDrag,
+  onDragEnd,
+}: {
+  position: [number, number]
+  onDrag: (lat: number, lng: number) => void
+  onDragEnd: (lat: number, lng: number) => void
+}) {
+  const markerRef = useRef<L.Marker>(null)
+  const eventHandlers = {
+    drag() {
+      const marker = markerRef.current
+      if (marker) {
+        const pos = marker.getLatLng()
+        onDrag(pos.lat, pos.lng)
+      }
+    },
+    dragend() {
+      const marker = markerRef.current
+      if (marker) {
+        const pos = marker.getLatLng()
+        onDragEnd(pos.lat, pos.lng)
+      }
+    },
+  }
+
+  return <Marker draggable={true} eventHandlers={eventHandlers} position={position} icon={plotPointIcon} ref={markerRef} />
+}
+
+function downloadJson(filename: string, data: unknown) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 function shortName(name: string): string {
   return name.replace('Desa Wisata ', '')
@@ -69,13 +146,15 @@ function shortName(name: string): string {
 
 export default function PokdarwisEditor() {
   const { lang } = useLang()
-  const { villages, updateVillage, addVillage, addAuditEntry } = useData()
+  const { villages, nextId, updateVillage, addVillage, removeVillage, addAuditEntry } = useVillages()
+  const { addPlot } = usePlots()
   const [mode, setMode] = useState<EditorMode>('edit')
   const [offline, setOffline] = useState(false)
   const [queued, setQueued] = useState(false)
   const [selectedId, setSelectedId] = useState(villages[0]?.id ?? 1)
   const [dirty, setDirty] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
+  const pendingActions = useRef<PendingVillageAction[]>([])
 
   const village = villages.find((v) => v.id === selectedId) ?? villages[0]
   const [villageName, setVillageName] = useState(village?.name ?? '')
@@ -96,7 +175,18 @@ export default function PokdarwisEditor() {
   const [newWhatsapp, setNewWhatsapp] = useState('')
   const [newImage, setNewImage] = useState('')
   const [newActivities, setNewActivities] = useState<EditableActivity[]>([])
+  const [newConsent, setNewConsent] = useState(false)
   const [validationError, setValidationError] = useState('')
+  const [rightsMsg, setRightsMsg] = useState('')
+
+  const [farmerId, setFarmerId] = useState('')
+  const [delegatedConsent, setDelegatedConsent] = useState(false)
+  const [delegatedSaved, setDelegatedSaved] = useState(false)
+  const [delegatedCommodity, setDelegatedCommodity] = useState<CommodityKey>('Salak')
+  const [delegatedStartMonth, setDelegatedStartMonth] = useState('5')
+  const [delegatedEndMonth, setDelegatedEndMonth] = useState('8')
+  const [delegatedVisibility, setDelegatedVisibility] = useState<'public' | 'private'>('public')
+  const [delegatedPoints, setDelegatedPoints] = useState<[number, number][]>(DEFAULT_POINTS)
 
   const selectVillage = (id: number) => {
     const v = villages.find((x) => x.id === id)
@@ -116,8 +206,34 @@ export default function PokdarwisEditor() {
   const switchMode = (m: EditorMode) => {
     setMode(m)
     setSuccessMsg('')
+    setRightsMsg('')
     setValidationError('')
     if (m === 'edit') selectVillage(selectedId)
+  }
+
+  const syncPendingActions = () => {
+    for (const action of pendingActions.current) {
+      if (action.type === 'update' && action.villageId && action.changes) {
+        updateVillage(action.villageId, action.changes)
+      }
+      if (action.type === 'add' && action.village) {
+        addVillage(action.village)
+      }
+      action.auditEntries.forEach((entry) => addAuditEntry(entry))
+    }
+    pendingActions.current = []
+    setQueued(false)
+    setSuccessMsg(tr('syncComplete', lang))
+  }
+
+  const toggleOffline = () => {
+    const goingOnline = offline
+    setOffline(!offline)
+    if (goingOnline && pendingActions.current.length > 0) {
+      syncPendingActions()
+    } else if (goingOnline) {
+      setQueued(false)
+    }
   }
 
   const markDirty = (fn: () => void) => {
@@ -173,16 +289,11 @@ export default function PokdarwisEditor() {
   }
 
   const handleSave = () => {
-    if (offline) {
-      setQueued(true)
-      return
-    }
-
     const numLat = parseFloat(lat) || (village?.lat ?? -7.7)
     const numLng = parseFloat(lng) || (village?.lng ?? 110.36)
     const mappedActivities = activities.filter(a => a.nameId.trim() || a.nameEn.trim()).map(editToAct)
 
-    updateVillage(selectedId, {
+    const changes: Partial<Village> = {
       name: villageName,
       lat: numLat,
       lng: numLng,
@@ -190,15 +301,26 @@ export default function PokdarwisEditor() {
       wheelchairAccess: wheelchair,
       activities: mappedActivities,
       hasActivities: mappedActivities.length > 0,
-    })
+    }
 
     const sn = shortName(villageName)
-    addAuditEntry({
+    const auditEntry: Omit<AuditEntry, 'timestamp'> = {
       actorId: 'pokdarwis-session',
       action: 'UPDATE_VILLAGE',
       targetId: `Perubahan — ${sn}`,
       targetEn: `Village Update — ${sn}`,
-    })
+    }
+
+    if (offline) {
+      pendingActions.current.push({ type: 'update', villageId: selectedId, changes, auditEntries: [auditEntry] })
+      setQueued(true)
+      setDirty(false)
+      setSuccessMsg(tr('savedLocal', lang))
+      return
+    }
+
+    updateVillage(selectedId, changes)
+    addAuditEntry(auditEntry)
 
     setDirty(false)
     setSuccessMsg(lang === 'en' ? 'Village updated successfully!' : 'Desa berhasil diperbarui!')
@@ -206,21 +328,18 @@ export default function PokdarwisEditor() {
 
   const handleAddVillage = () => {
     setValidationError('')
-    if (!newName.trim() || !newDescId.trim() || !newDescEn.trim() || !newWhatsapp.trim()) {
+    if (!newName.trim() || !newDescId.trim() || !newDescEn.trim() || !newWhatsapp.trim() || !newConsent) {
       setValidationError(tr('fillRequired', lang))
-      return
-    }
-
-    if (offline) {
-      setQueued(true)
       return
     }
 
     const numLat = parseFloat(newLat) || -7.700
     const numLng = parseFloat(newLng) || 110.360
     const mappedActivities = newActivities.filter(a => a.nameId.trim() || a.nameEn.trim()).map(editToAct)
+    const pendingAddCount = pendingActions.current.filter((action) => action.type === 'add').length
 
-    const created = addVillage({
+    const created: Village = {
+      id: nextId + pendingAddCount,
       name: newName.trim(),
       descId: newDescId.trim(),
       descEn: newDescEn.trim(),
@@ -231,33 +350,151 @@ export default function PokdarwisEditor() {
       wheelchairAccess: newWheelchair,
       activities: mappedActivities,
       whatsapp: newWhatsapp.trim(),
+      clickThroughs: 0,
       photoColor: '#5b8c3e',
       image: newImage.trim() || `https://picsum.photos/seed/${newName.trim().toLowerCase().replace(/\s+/g, '')}/600/300`,
-    })
+    }
 
     const sn = shortName(newName.trim())
-    addAuditEntry({
+    const registerAudit: Omit<AuditEntry, 'timestamp'> = {
       actorId: 'pokdarwis-session',
       action: 'REGISTER_VILLAGE',
       targetId: `Registrasi — ${sn}`,
       targetEn: `Village Registration — ${sn}`,
-    })
+    }
+    const consentAudit: Omit<AuditEntry, 'timestamp'> = {
+      actorId: 'pokdarwis-session',
+      action: 'CONFIRM_MUSYAWARAH_CONSENT',
+      targetId: `Persetujuan Musyawarah — ${sn}`,
+      targetEn: `Musyawarah Consent — ${sn}`,
+    }
 
-    setSuccessMsg(tr('villageAdded', lang))
+    if (offline) {
+      pendingActions.current.push({ type: 'add', village: created, auditEntries: [registerAudit, consentAudit] })
+      setQueued(true)
+      setSuccessMsg(tr('savedLocal', lang))
+    } else {
+      addVillage(created)
+      addAuditEntry(registerAudit)
+      addAuditEntry(consentAudit)
+      setSuccessMsg(tr('villageAdded', lang))
+    }
     setNewName('')
     setNewDescId('')
     setNewDescEn('')
     setNewLat('-7.700')
-    setNewLng('-7.360')
+    setNewLng('110.360')
     setNewInSeason(false)
     setNewWheelchair(false)
     setNewWhatsapp('')
     setNewImage('')
     setNewActivities([])
+    setNewConsent(false)
 
-    setSelectedId(created.id)
-    setMode('edit')
-    selectVillage(created.id)
+    if (!offline) {
+      setSelectedId(created.id)
+      setMode('edit')
+      setVillageName(created.name)
+      setLat(String(created.lat))
+      setLng(String(created.lng))
+      setInSeason(created.inSeason)
+      setWheelchair(created.wheelchairAccess)
+      setActivities(created.activities.map(actToEdit))
+      setPhotos(villageToPhotos(created))
+      setDirty(false)
+    }
+  }
+
+  const addDelegatedPoint = (pointLat: number, pointLng: number) => {
+    setDelegatedPoints((prev) => [...prev, [pointLat, pointLng]])
+    setDelegatedSaved(false)
+  }
+
+  const updateDelegatedPoint = (index: number, pointLat: number, pointLng: number) => {
+    setDelegatedPoints((prev) => {
+      const next = [...prev]
+      next[index] = [pointLat, pointLng]
+      return next
+    })
+    setDelegatedSaved(false)
+  }
+
+  const removeLastDelegatedPoint = () => {
+    setDelegatedPoints((prev) => (prev.length > 0 ? prev.slice(0, -1) : prev))
+    setDelegatedSaved(false)
+  }
+
+  const clearDelegatedPoints = () => {
+    setDelegatedPoints([])
+    setDelegatedSaved(false)
+  }
+
+  const handleDelegatedPlotSave = () => {
+    if (!farmerId.trim() || !delegatedConsent || delegatedPoints.length < 3) return
+
+    const plot: FarmerPlot = {
+      id: Date.now(),
+      farmerId: farmerId.trim(),
+      villageId: selectedId,
+      commodity: delegatedCommodity,
+      commodityEn: COMMODITY_EN[delegatedCommodity],
+      inSeason: true,
+      public: delegatedVisibility === 'public',
+      harvestStart: Number(delegatedStartMonth),
+      harvestEnd: Number(delegatedEndMonth),
+      points: [...delegatedPoints],
+    }
+
+    addPlot(plot)
+    addAuditEntry({
+      actorId: 'pokdarwis-session',
+      action: 'DELEGATED_REGISTER_PLOT',
+      targetId: `Lahan ${plot.commodity} — ${farmerId.trim()}`,
+      targetEn: `${plot.commodityEn} Plot — ${farmerId.trim()}`,
+    })
+    addAuditEntry({
+      actorId: 'pokdarwis-session',
+      action: 'CONFIRM_FARMER_CONSENT',
+      targetId: `Persetujuan Petani — ${farmerId.trim()}`,
+      targetEn: `Farmer Consent — ${farmerId.trim()}`,
+    })
+
+    setDelegatedSaved(true)
+    setFarmerId('')
+    setDelegatedConsent(false)
+    setDelegatedCommodity('Salak')
+    setDelegatedStartMonth('5')
+    setDelegatedEndMonth('8')
+    setDelegatedVisibility('public')
+    setDelegatedPoints(DEFAULT_POINTS)
+    setSuccessMsg(tr('delegatedSaved', lang))
+  }
+
+  const exportSelectedVillage = () => {
+    downloadJson(`desaconnect_village_${selectedId}.json`, village)
+    addAuditEntry({
+      actorId: 'pokdarwis-session',
+      action: 'EXPORT_OWN_DATA',
+      targetId: `Ekspor data — ${village.name}`,
+      targetEn: `Data export — ${village.name}`,
+    })
+    setRightsMsg(tr('exportDone', lang))
+  }
+
+  const deleteSelectedVillage = () => {
+    if (!window.confirm(lang === 'en' ? 'Delete the selected village from this session?' : 'Hapus desa terpilih dari sesi ini?')) return
+    const nextVillageId = villages.find((v) => v.id !== selectedId)?.id ?? selectedId
+    removeVillage(selectedId)
+    addAuditEntry({
+      actorId: 'pokdarwis-session',
+      action: 'DELETE_DATA_REQUEST',
+      targetId: `Hapus data — ${village.name}`,
+      targetEn: `Delete data — ${village.name}`,
+    })
+    setRightsMsg(tr('deleteDone', lang))
+    if (nextVillageId !== selectedId) {
+      selectVillage(nextVillageId)
+    }
   }
 
   const totalActivities = activities.length
@@ -277,7 +514,7 @@ export default function PokdarwisEditor() {
         </span>
         <button
           className={`toggle ${offline ? 'on' : ''}`}
-          onClick={() => { setOffline(!offline); if (!offline) setQueued(false) }}
+          onClick={toggleOffline}
           aria-label="Toggle offline simulation"
         />
       </div>
@@ -288,6 +525,9 @@ export default function PokdarwisEditor() {
         </button>
         <button className={`mode-tab ${mode === 'add' ? 'active' : ''}`} onClick={() => switchMode('add')}>
           {tr('addVillage', lang)}
+        </button>
+        <button className={`mode-tab ${mode === 'delegate' ? 'active' : ''}`} onClick={() => switchMode('delegate')}>
+          {tr('delegatedRegister', lang)}
         </button>
       </div>
 
@@ -498,8 +738,20 @@ export default function PokdarwisEditor() {
               {tr('queuedNotice', lang)}
             </div>
           )}
+
+          <div className="form-card">
+            <div className="card-header-row">
+              <h3 style={{ fontSize: '0.95rem', color: 'var(--dark)' }}>{tr('dataRightsTitle', lang)}</h3>
+            </div>
+            <p className="screen-desc" style={{ marginBottom: 12 }}>{tr('dataRightsDesc', lang)}</p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button className="btn-sm" onClick={exportSelectedVillage}>{tr('exportMyData', lang)}</button>
+              <button className="btn-sm btn-sm-danger" onClick={deleteSelectedVillage}>{tr('deleteMyData', lang)}</button>
+            </div>
+            {rightsMsg && <p style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--muted)' }}>{rightsMsg}</p>}
+          </div>
         </>
-      ) : (
+      ) : mode === 'add' ? (
         <>
           <p className="screen-desc">{tr('addVillageDesc', lang)}</p>
 
@@ -632,6 +884,18 @@ export default function PokdarwisEditor() {
               <label>{tr('imageUrl', lang)}</label>
               <input value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder={lang === 'en' ? 'https://example.com/photo.jpg (optional)' : 'https://example.com/foto.jpg (opsional)'} />
             </div>
+
+            <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <input
+                type="checkbox"
+                checked={newConsent}
+                onChange={(e) => setNewConsent(e.target.checked)}
+                style={{ marginTop: 4, width: 18, height: 18, flexShrink: 0 }}
+              />
+              <span style={{ fontSize: '0.82rem', color: 'var(--dark)', lineHeight: 1.4 }}>
+                {tr('consentLabel', lang)}
+              </span>
+            </div>
           </div>
 
           <div className="form-card">
@@ -681,6 +945,8 @@ export default function PokdarwisEditor() {
           <button
             className={`btn-primary ${offline ? 'offline' : 'dirty'}`}
             onClick={handleAddVillage}
+            disabled={!newName.trim() || !newConsent}
+            style={{ opacity: !newName.trim() || !newConsent ? 0.5 : 1 }}
           >
             {offline
               ? tr('savedLocal', lang)
@@ -693,6 +959,110 @@ export default function PokdarwisEditor() {
               {tr('queuedNotice', lang)}
             </div>
           )}
+        </>
+      ) : (
+        <>
+          <div className="form-card">
+            <h3 style={{ fontSize: '0.95rem', color: 'var(--dark)', marginBottom: 4 }}>{tr('delegatedPlotTitle', lang)}</h3>
+            <p className="screen-desc">{tr('delegatedPlotDesc', lang)}</p>
+
+            <div className="form-group">
+              <label>{lang === 'en' ? 'Village' : 'Desa'}</label>
+              <select value={selectedId} onChange={(e) => { setSelectedId(Number(e.target.value)); setDelegatedSaved(false) }}>
+                {villages.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>{tr('delegatedFarmerId', lang)}</label>
+              <input value={farmerId} onChange={(e) => { setFarmerId(e.target.value); setDelegatedSaved(false) }} placeholder={lang === 'en' ? 'e.g. farmer-elder-01 or Pak Suyatno' : 'cth. farmer-lansia-01 atau Pak Suyatno'} />
+            </div>
+
+            <div className="map-draw-area" style={{ height: 320 }}>
+              <MapContainer center={[numLat, numLng]} zoom={14} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
+                <TileLayer attribution='' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <PlotMapClickHandler onMapClick={addDelegatedPoint} />
+                {delegatedPoints.length > 2 && (
+                  <Polygon positions={delegatedPoints} pathOptions={{ color: '#4A7C2E', fillColor: '#4A7C2E', fillOpacity: 0.25, weight: 2 }} />
+                )}
+                {delegatedPoints.map((point, i) => (
+                  <PlotDraggableMarker key={i} position={point} onDrag={(pointLat, pointLng) => updateDelegatedPoint(i, pointLat, pointLng)} onDragEnd={(pointLat, pointLng) => updateDelegatedPoint(i, pointLat, pointLng)} />
+                ))}
+              </MapContainer>
+            </div>
+
+            <div className="map-draw-controls">
+              <span className="map-draw-hint">{tr('farmerDrawHint', lang)}</span>
+              <div className="map-draw-buttons">
+                <button className="btn-sm" onClick={removeLastDelegatedPoint}>{tr('farmerUndoPoint', lang)}</button>
+                <button className="btn-sm btn-sm-danger" onClick={clearDelegatedPoints}>{tr('farmerClearPoints', lang)}</button>
+              </div>
+            </div>
+
+            <div className="polygon-info">
+              {delegatedPoints.length > 0 && <span>{delegatedPoints.length} {lang === 'en' ? 'points' : 'titik'}{delegatedPoints.length >= 3 ? ` · ${(delegatedPoints.length * 0.14 + 0.08).toFixed(2)} ha` : ''}</span>}
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>{tr('commodity', lang)}</label>
+                <select value={delegatedCommodity} onChange={(e) => { setDelegatedCommodity(e.target.value as CommodityKey); setDelegatedSaved(false) }}>
+                  {Object.keys(COMMODITY_EN).map((key) => (
+                    <option key={key} value={key}>{tr(`commodity${key}` as TranslationKey, lang)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>{tr('visibility', lang)}</label>
+                <select value={delegatedVisibility} onChange={(e) => { setDelegatedVisibility(e.target.value as 'public' | 'private'); setDelegatedSaved(false) }}>
+                  <option value="public">{tr('publicReduced', lang)}</option>
+                  <option value="private">{tr('private', lang)}</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>{tr('harvestStart', lang)}</label>
+                <select value={delegatedStartMonth} onChange={(e) => { setDelegatedStartMonth(e.target.value); setDelegatedSaved(false) }}>
+                  {getMonths(lang).map((month, i) => (
+                    <option key={i} value={String(i + 1)}>{month}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>{tr('harvestEnd', lang)}</label>
+                <select value={delegatedEndMonth} onChange={(e) => { setDelegatedEndMonth(e.target.value); setDelegatedSaved(false) }}>
+                  {getMonths(lang).map((month, i) => (
+                    <option key={i} value={String(i + 1)}>{month}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <input
+                type="checkbox"
+                checked={delegatedConsent}
+                onChange={(e) => { setDelegatedConsent(e.target.checked); setDelegatedSaved(false) }}
+                style={{ marginTop: 4, width: 18, height: 18, flexShrink: 0 }}
+              />
+              <span style={{ fontSize: '0.82rem', color: 'var(--dark)', lineHeight: 1.4 }}>{tr('delegatedConsentLabel', lang)}</span>
+            </div>
+
+            <button className="btn-primary dirty" onClick={handleDelegatedPlotSave} disabled={!farmerId.trim() || !delegatedConsent || delegatedPoints.length < 3} style={{ opacity: !farmerId.trim() || !delegatedConsent || delegatedPoints.length < 3 ? 0.5 : 1 }}>
+              {tr('delegatedRegister', lang)}
+            </button>
+
+            {delegatedSaved && (
+              <div className="offline-notice" style={{ background: '#d4edda', borderColor: '#a3d9a5', color: '#155724', marginTop: 12 }}>
+                <span className="dot" style={{ background: '#28a745' }} />
+                {tr('delegatedSaved', lang)}
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

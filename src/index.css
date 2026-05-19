@@ -270,18 +270,27 @@ button, select, input, textarea {
 
 .detail-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: none;
-  background: rgba(0,0,0,0.08);
-  font-size: 1.1rem;
+  border: 2px solid rgba(36,53,29,0.16);
+  background: rgba(255,255,255,0.96);
+  color: var(--dark);
+  font-size: 1.2rem;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+}
+
+.detail-close:hover {
+  background: #fff;
+  border-color: rgba(36,53,29,0.28);
 }
 
 .detail-photo {
@@ -915,4 +924,190 @@ button, select, input, textarea {
   font-size: 0.88rem;
   color: var(--danger);
   font-weight: 600;
+}
+
+/* ── Reviews ──────────────────────────────────────── */
+
+.review-section {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e8e2d6;
+}
+
+.review-section h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.review-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.review-stars {
+  display: inline-flex;
+  gap: 1px;
+}
+
+.star {
+  color: #ddd;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.star.filled {
+  color: #e6a817;
+}
+
+.review-avg {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--dark);
+}
+
+.review-count {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.review-card {
+  background: #fff;
+  border: 1px solid #e8e2d6;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.review-author {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.review-text {
+  font-size: 0.85rem;
+  color: var(--dark);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.review-date {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.review-none {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 8px 0;
+}
+
+.review-form {
+  background: #fff;
+  border: 1.5px solid #e8e2d6;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.review-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.92rem;
+  resize: vertical;
+  background: #fff;
+}
+
+.review-form textarea:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+.rating-select {
+  display: flex;
+  gap: 4px;
+}
+
+.rating-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #ddd;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.rating-btn.active,
+.rating-btn:hover {
+  color: #e6a817;
+}
+
+/* ── Export ───────────────────────────────────────── */
+
+.export-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.export-section h3 {
+  font-size: 1rem;
+  margin-bottom: 16px;
+  color: var(--dark);
+}
+
+.export-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.export-btn {
+  width: auto;
+  flex: 1;
+  min-width: 180px;
+  font-size: 0.88rem;
+  padding: 12px 16px;
+}
+
+/* ── Plot Popup ──────────────────────────────────── */
+
+.plot-popup {
+  min-width: 160px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.plot-popup strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.plot-popup-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.plot-popup-label {
+  color: var(--muted);
+  white-space: nowrap;
 }

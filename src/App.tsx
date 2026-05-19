@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { LangProvider, useLang } from './components/LangProvider'
-import { DataProvider } from './components/DataProvider'
+import { VillagesProvider } from './components/VillagesProvider'
+import { PlotsProvider } from './components/PlotsProvider'
 import { tr } from './data/i18n'
 import VisitorMapView from './views/VisitorMapView'
 import PokdarwisEditor from './views/PokdarwisEditor'
@@ -72,9 +73,11 @@ function AppInner() {
 export default function App() {
   return (
     <LangProvider>
-      <DataProvider>
-        <AppInner />
-      </DataProvider>
+      <VillagesProvider>
+        <PlotsProvider>
+          <AppInner />
+        </PlotsProvider>
+      </VillagesProvider>
     </LangProvider>
   )
 }

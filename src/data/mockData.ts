@@ -31,7 +31,30 @@ export interface AuditEntry {
   targetEn: string;
 }
 
-export const initialVillages: Village[] = [
+export interface Review {
+  id: number;
+  villageId: number;
+  author: string;
+  rating: number;
+  textId: string;
+  textEn: string;
+  date: string;
+}
+
+export interface FarmerPlot {
+  id: number;
+  farmerId: string;
+  villageId: number;
+  commodity: string;
+  commodityEn: string;
+  inSeason: boolean;
+  public: boolean;
+  harvestStart: number;
+  harvestEnd: number;
+  points: [number, number][];
+}
+
+export const villages: Village[] = [
   {
     id: 1,
     name: "Desa Wisata Pentingsari",
@@ -136,9 +159,7 @@ export const initialVillages: Village[] = [
     inSeason: false,
     hasActivities: false,
     wheelchairAccess: false,
-    activities: [
-      { nameId: "Tur Belimbing", nameEn: "Starfruit Tour", price: "Rp 40.000 (~$2)", durationId: "1 jam", durationEn: "1 hour" },
-    ],
+    activities: [],
     whatsapp: "6281234560006",
     clickThroughs: 89,
     photoColor: "#8a7b4a",
@@ -267,9 +288,7 @@ export const initialVillages: Village[] = [
     inSeason: false,
     hasActivities: false,
     wheelchairAccess: false,
-    activities: [
-      { nameId: "Taman Bunga", nameEn: "Flower Garden Tour", price: "Rp 20.000 (~$1)", durationId: "45 menit", durationEn: "45 minutes" },
-    ],
+    activities: [],
     whatsapp: "6281234560013",
     clickThroughs: 67,
     photoColor: "#b07aa1",
@@ -323,9 +342,7 @@ export const initialVillages: Village[] = [
     inSeason: true,
     hasActivities: false,
     wheelchairAccess: true,
-    activities: [
-      { nameId: "Spa & Wellness Kampung", nameEn: "Village Spa & Wellness", price: "Rp 180.000 (~$11)", durationId: "2 jam", durationEn: "2 hours" },
-    ],
+    activities: [],
     whatsapp: "6281234560016",
     clickThroughs: 145,
     photoColor: "#6e9e8e",
@@ -398,9 +415,7 @@ export const initialVillages: Village[] = [
     inSeason: false,
     hasActivities: false,
     wheelchairAccess: false,
-    activities: [
-      { nameId: "Latihan Tari Sindeni", nameEn: "Sindeni Dance Practice", price: "Rp 30.000 (~$2)", durationId: "1 jam", durationEn: "1 hour" },
-    ],
+    activities: [],
     whatsapp: "6281234560020",
     clickThroughs: 54,
     photoColor: "#a86e5a",
@@ -511,9 +526,7 @@ export const initialVillages: Village[] = [
     inSeason: true,
     hasActivities: false,
     wheelchairAccess: true,
-    activities: [
-      { nameId: "Agrowisata Durian", nameEn: "Durian Farm Tour", price: "Rp 80.000 (~$5)", durationId: "1 jam", durationEn: "1 hour" },
-    ],
+    activities: [],
     whatsapp: "6281234560026",
     clickThroughs: 142,
     photoColor: "#7a8a3a",
@@ -529,9 +542,7 @@ export const initialVillages: Village[] = [
     inSeason: false,
     hasActivities: false,
     wheelchairAccess: false,
-    activities: [
-      { nameId: "Belajar Menari", nameEn: "Traditional Dance Lesson", price: "Rp 35.000 (~$2)", durationId: "1 jam", durationEn: "1 hour" },
-    ],
+    activities: [],
     whatsapp: "6281234560027",
     clickThroughs: 43,
     photoColor: "#9e5a6e",
@@ -596,7 +607,7 @@ export const initialVillages: Village[] = [
   },
 ];
 
-export const initialAuditLog: AuditEntry[] = [
+export const auditLog: AuditEntry[] = [
   { actorId: "pokdarwis-001", action: "UPDATE_SEASON", timestamp: "2026-05-12 14:23:01", targetId: "Musim Panen — Pentingsari", targetEn: "Harvest Season — Pentingsari" },
   { actorId: "farmer-042", action: "REGISTER_PLOT", timestamp: "2026-05-12 13:15:44", targetId: "Lahan Salak, Glagaharjo", targetEn: "Snakefruit Plot, Glagaharjo" },
   { actorId: "pokdarwis-003", action: "ADD_ACTIVITY", timestamp: "2026-05-12 12:08:30", targetId: "Aktivitas Baru — Sambi", targetEn: "New Activity — Sambi" },
@@ -622,6 +633,47 @@ export const initialAuditLog: AuditEntry[] = [
   { actorId: "farmer-037", action: "UPDATE_HARVEST", timestamp: "2026-05-09 13:38:44", targetId: "Musim Panen Cabai, Purwobinangun", targetEn: "Chili Harvest, Purwobinangun" },
   { actorId: "pokdarwis-030", action: "UPDATE_SEASON", timestamp: "2026-05-09 12:25:09", targetId: "Musim Panen — Minomartani", targetEn: "Harvest Season — Minomartani" },
   { actorId: "officer-001", action: "APPROVE_VILLAGE", timestamp: "2026-05-09 11:12:33", targetId: "Persetujuan Desa — Tirtomartani", targetEn: "Village Approval — Tirtomartani" },
+];
+
+export const reviews: Review[] = [
+  { id: 1, villageId: 1, author: "Rina S.", rating: 5, textId: "Pengalaman luar biasa! Homestay-nya nyaman dan workshop batiknya sangat menarik.", textEn: "Amazing experience! The homestay was comfortable and the batik workshop was really engaging.", date: "2026-05-10" },
+  { id: 2, villageId: 1, author: "Tom V.", rating: 4, textId: "Suasana desa yang tenang, cocok untuk liburan keluarga.", textEn: "Peaceful village atmosphere, great for a family getaway.", date: "2026-05-08" },
+  { id: 3, villageId: 2, author: "Budi P.", rating: 5, textId: "Tur bersepeda di sawah sangat menyenangkan. Pemandangan indah!", textEn: "The rice paddy cycling tour was so much fun. Beautiful scenery!", date: "2026-05-09" },
+  { id: 4, villageId: 2, author: "Lisa K.", rating: 4, textId: "Memasak tradisional bersama warga sangat autentik.", textEn: "Cooking with the locals was a very authentic experience.", date: "2026-05-06" },
+  { id: 5, villageId: 5, author: "Andi R.", rating: 5, textId: "River tubing seru banget! Pasti kembali lagi.", textEn: "River tubing was thrilling! Will definitely come back.", date: "2026-05-11" },
+  { id: 6, villageId: 5, author: "Sarah M.", rating: 3, textId: "Camping-nya oke tapi fasilitas bisa ditingkatkan.", textEn: "Camping was okay but facilities could be improved.", date: "2026-05-07" },
+  { id: 7, villageId: 5, author: "Dewi L.", rating: 5, textId: "Outbound paling seru yang pernah saya coba.", textEn: "Best outbound activity I have ever tried.", date: "2026-05-04" },
+  { id: 8, villageId: 8, author: "Jan D.", rating: 5, textId: "Trekking Gunung Api Purba sangat menantang, pemandangan dari atas luar biasa.", textEn: "Ancient volcano trekking was challenging and the view from the top was incredible.", date: "2026-05-10" },
+  { id: 9, villageId: 8, author: "Wati N.", rating: 4, textId: "Camping dan stargazing pengalaman yang tak terlupakan.", textEn: "Camping and stargazing was an unforgettable experience.", date: "2026-05-05" },
+  { id: 10, villageId: 9, author: "Eko T.", rating: 4, textId: "Workshop topeng kayu sangat interaktif, seniman lokal sangat terampil.", textEn: "The wooden mask workshop was very interactive, local artists are highly skilled.", date: "2026-05-09" },
+  { id: 11, villageId: 14, author: "Niels V.", rating: 5, textId: "Panen padi interaktif sangat menyenangkan, anak-anak suka sekali.", textEn: "The interactive rice harvest was so much fun, the kids loved it.", date: "2026-05-11" },
+  { id: 12, villageId: 14, author: "Sari A.", rating: 4, textId: "Pengalaman menanam padi yang unik dan edukatif.", textEn: "A unique and educational rice planting experience.", date: "2026-05-03" },
+  { id: 13, villageId: 19, author: "Mike B.", rating: 5, textId: "Tur jeep Merapi sangat seru, pemandu sangat berpengalaman.", textEn: "Merapi jeep tour was awesome, very experienced guides.", date: "2026-05-12" },
+  { id: 14, villageId: 19, author: "Putri R.", rating: 4, textId: "Sepeda lahar menantang tapi sangat menyenangkan.", textEn: "Lava trail biking was challenging but great fun.", date: "2026-05-08" },
+  { id: 15, villageId: 15, author: "Alex G.", rating: 5, textId: "Belajar gamelan dan wayang kulit sangat menarik, seniman lokal sangat ramah.", textEn: "Learning gamelan and shadow puppetry was fascinating, locals were very welcoming.", date: "2026-05-07" },
+  { id: 16, villageId: 25, author: "Femke J.", rating: 4, textId: "Kebun teh dan hutan pinus sangat sejuk dan asri.", textEn: "The tea plantation and pine forest were refreshingly green and peaceful.", date: "2026-05-10" },
+  { id: 17, villageId: 4, author: "Yanto H.", rating: 4, textId: "Trekking sungai petualangan yang mengasyikkan.", textEn: "River trekking was an exciting adventure.", date: "2026-05-06" },
+  { id: 18, villageId: 12, author: "Pieter W.", rating: 5, textId: "Edukasi kopi dari kebun hingga cangkir sangat informatif.", textEn: "The coffee farm-to-cup education was very informative.", date: "2026-05-09" },
+  { id: 19, villageId: 22, author: "Siti M.", rating: 4, textId: "Piknik tepi waduk sangat tenang, perahu tradisionalnya unik.", textEn: "Reservoir picnic was very peaceful, the traditional boat ride was unique.", date: "2026-05-05" },
+  { id: 20, villageId: 10, author: "Rudi K.", rating: 5, textId: "Salak pondoh termanis yang pernah saya makan! Tur panen sangat seru.", textEn: "Sweetest salak I ever tasted! The harvest tour was great fun.", date: "2026-05-11" },
+  { id: 21, villageId: 7, author: "Hanna B.", rating: 3, textId: "Kerajinan anyaman menarik tapi wisata susu sapi kurang terorganisir.", textEn: "Weaving craft was interesting but the dairy tour felt a bit disorganized.", date: "2026-05-04" },
+  { id: 22, villageId: 23, author: "Arie S.", rating: 5, textId: "Trekking Merapi puncak pengalaman kami di Yogyakarta.", textEn: "Merapi trekking was the highlight of our Yogyakarta trip.", date: "2026-05-12" },
+  { id: 23, villageId: 29, author: "Emma T.", rating: 4, textId: "Konsep farm-to-table sangat menarik, makanannya segar dan lezat.", textEn: "The farm-to-table concept is great, food was fresh and delicious.", date: "2026-05-08" },
+  { id: 24, villageId: 30, author: "Farid M.", rating: 4, textId: "Tur lahar Merapi sangat mengesankan, pemandu sangat informatif.", textEn: "Merapi lava tour was impressive, guide was very knowledgeable.", date: "2026-05-06" },
+  { id: 25, villageId: 16, author: "Claire D.", rating: 5, textId: "Spa tradisional di desa sangat relaksasi, suasana alam yang menenangkan.", textEn: "The traditional village spa was so relaxing, surrounded by calming nature.", date: "2026-05-10" },
+];
+
+export const farmerPlots: FarmerPlot[] = [
+  { id: 1, farmerId: "farmer-042", villageId: 23, commodity: "Salak", commodityEn: "Snakefruit (Salak)", inSeason: true, public: true, harvestStart: 5, harvestEnd: 8, points: [[-7.590, 110.456], [-7.588, 110.464], [-7.593, 110.466], [-7.595, 110.458]] },
+  { id: 2, farmerId: "farmer-017", villageId: 30, commodity: "Cabai", commodityEn: "Chili (Cabai)", inSeason: true, public: true, harvestStart: 4, harvestEnd: 10, points: [[-7.602, 110.444], [-7.598, 110.452], [-7.604, 110.454], [-7.606, 110.447]] },
+  { id: 3, farmerId: "farmer-031", villageId: 14, commodity: "Padi", commodityEn: "Rice (Padi)", inSeason: true, public: true, harvestStart: 3, harvestEnd: 6, points: [[-7.636, 110.404], [-7.634, 110.412], [-7.640, 110.413], [-7.641, 110.406]] },
+  { id: 4, farmerId: "farmer-009", villageId: 10, commodity: "Salak", commodityEn: "Snakefruit (Salak)", inSeason: false, public: true, harvestStart: 7, harvestEnd: 10, points: [[-7.760, 110.288], [-7.757, 110.295], [-7.762, 110.297], [-7.764, 110.290]] },
+  { id: 5, farmerId: "farmer-055", villageId: 15, commodity: "Jagung", commodityEn: "Corn (Jagung)", inSeason: true, public: true, harvestStart: 1, harvestEnd: 4, points: [[-7.660, 110.452], [-7.657, 110.460], [-7.663, 110.462], [-7.665, 110.454]] },
+  { id: 6, farmerId: "farmer-037", villageId: 26, commodity: "Cabai", commodityEn: "Chili (Cabai)", inSeason: true, public: true, harvestStart: 4, harvestEnd: 9, points: [[-7.585, 110.411], [-7.583, 110.418], [-7.588, 110.419], [-7.590, 110.413]] },
+  { id: 7, farmerId: "farmer-048", villageId: 7, commodity: "Padi", commodityEn: "Rice (Padi)", inSeason: false, public: true, harvestStart: 11, harvestEnd: 2, points: [[-7.737, 110.356], [-7.734, 110.364], [-7.739, 110.365], [-7.741, 110.358]] },
+  { id: 8, farmerId: "farmer-061", villageId: 18, commodity: "Jagung", commodityEn: "Corn (Jagung)", inSeason: true, public: false, harvestStart: 2, harvestEnd: 5, points: [[-7.684, 110.268], [-7.682, 110.275], [-7.687, 110.277], [-7.689, 110.270]] },
+  { id: 9, farmerId: "farmer-023", villageId: 12, commodity: "Padi", commodityEn: "Rice (Padi)", inSeason: true, public: true, harvestStart: 3, harvestEnd: 7, points: [[-7.695, 110.428], [-7.692, 110.436], [-7.697, 110.437], [-7.699, 110.430]] },
+  { id: 10, farmerId: "farmer-045", villageId: 25, commodity: "Salak", commodityEn: "Snakefruit (Salak)", inSeason: true, public: true, harvestStart: 6, harvestEnd: 9, points: [[-7.647, 110.494], [-7.644, 110.502], [-7.650, 110.503], [-7.652, 110.496]] },
 ];
 
 export const BULAN = [
