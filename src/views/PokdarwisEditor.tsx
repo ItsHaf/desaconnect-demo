@@ -416,6 +416,13 @@ export default function PokdarwisEditor() {
       harvestEnd: Number(delegatedEndMonth),
       points: [...delegatedPoints],
     }
+    plot.inSeason = (() => {
+      const currentMonth = new Date().getMonth() + 1
+      const start = plot.harvestStart
+      const end = plot.harvestEnd
+      if (start <= end) return currentMonth >= start && currentMonth <= end
+      return currentMonth >= start || currentMonth <= end
+    })()
 
     addPlot(plot)
     addAuditEntry({
@@ -602,7 +609,7 @@ export default function PokdarwisEditor() {
                     aria-label="Toggle in season"
                   />
                   <span className="toggle-label">
-                    {inSeason ? tr('inSeason', lang) : tr('offSeason', lang)}
+                    {inSeason ? tr('openForVisits', lang) : tr('closedForVisits', lang)}
                   </span>
                 </div>
               </div>
@@ -826,7 +833,7 @@ export default function PokdarwisEditor() {
                     aria-label="Toggle in season"
                   />
                   <span className="toggle-label">
-                    {newInSeason ? tr('inSeason', lang) : tr('offSeason', lang)}
+                    {newInSeason ? tr('openForVisits', lang) : tr('closedForVisits', lang)}
                   </span>
                 </div>
               </div>

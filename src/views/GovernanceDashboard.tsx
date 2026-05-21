@@ -19,7 +19,7 @@ function downloadCsv(filename: string, rows: string[][]) {
 }
 
 function exportVillagesCsv(allVillages: { id: number; name: string; lat: number; lng: number; inSeason: boolean; wheelchairAccess: boolean; activities: unknown[]; clickThroughs: number; whatsapp: string }[]) {
-  const header = ['ID', 'Name', 'Latitude', 'Longitude', 'In Season', 'Wheelchair Access', 'Activities', 'Click-throughs', 'WhatsApp']
+  const header = ['ID', 'Name', 'Latitude', 'Longitude', 'Open for Visits', 'Wheelchair Access', 'Activities', 'Click-throughs', 'WhatsApp']
   const rows = allVillages.map((village) => [
     String(village.id),
     village.name,

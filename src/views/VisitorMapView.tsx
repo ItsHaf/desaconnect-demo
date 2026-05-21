@@ -14,10 +14,21 @@ function simplifyPublicPoints(points: [number, number][]): [number, number][] {
   return deduped.length >= 3 ? deduped : points
 }
 
+function isPlotInSeason(plot: FarmerPlot): boolean {
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1
+  const start = plot.harvestStart
+  const end = plot.harvestEnd
+  if (start <= end) {
+    return currentMonth >= start && currentMonth <= end
+  }
+  return currentMonth >= start || currentMonth <= end
+}
+
 function createIcon(v: Village) {
   return L.divIcon({
     className: '',
-    html: `<div class="village-marker ${v.inSeason ? '' : 'off-season'}"><span>${v.name.charAt(v.name.lastIndexOf(' ') + 1)}</span></div>`,
+    html: `<div class="village-marker ${!v.inSeason ? 'off-season' : ''}"><span>${v.name.charAt(v.name.lastIndexOf(' ') + 1)}</span></div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 32],
   })
@@ -38,6 +49,7 @@ function Stars({ rating }: { rating: number }) {
 }
 
 function PlotPopup({ plot, villageName, months, lang }: { plot: FarmerPlot; villageName: string; months: string[]; lang: Lang }) {
+  const inSeason = isPlotInSeason(plot)
   return (
     <Popup>
       <div className="plot-popup">
@@ -51,8 +63,8 @@ function PlotPopup({ plot, villageName, months, lang }: { plot: FarmerPlot; vill
           <span>{months[plot.harvestStart - 1]} - {months[plot.harvestEnd - 1]}</span>
         </div>
         <div className="plot-popup-row">
-          <span className={`badge ${plot.inSeason ? 'in-season' : 'off-season'}`} style={{ margin: 0, fontSize: '0.7rem' }}>
-            {plot.inSeason ? tr('plotSeasonYes' as TranslationKey, lang) : tr('plotSeasonNo' as TranslationKey, lang)}
+          <span className={`badge ${inSeason ? 'in-season' : 'off-season'}`} style={{ margin: 0, fontSize: '0.7rem' }}>
+            {inSeason ? tr('plotSeasonYes' as TranslationKey, lang) : tr('plotSeasonNo' as TranslationKey, lang)}
           </span>
         </div>
         <div style={{ fontSize: '0.72rem', color: '#888', marginTop: 4 }}>{villageName}</div>
@@ -62,17 +74,19 @@ function PlotPopup({ plot, villageName, months, lang }: { plot: FarmerPlot; vill
 }
 
 interface Filters {
-  inSeason: boolean
+  openForVisits: boolean
   hasActivities: boolean
   wheelchairAccess: boolean
+  plotsInSeason: boolean
 }
 
 export default function VisitorMapView() {
   const [selected, setSelected] = useState<Village | null>(null)
   const [filters, setFilters] = useState<Filters>({
-    inSeason: false,
+    openForVisits: false,
     hasActivities: false,
     wheelchairAccess: false,
+    plotsInSeason: false,
   })
   const [showPlots, setShowPlots] = useState(true)
   const { lang } = useLang()
@@ -86,7 +100,7 @@ export default function VisitorMapView() {
   const [formRating, setFormRating] = useState(5)
 
   const filtered = villages.filter((v) => {
-    if (filters.inSeason && !v.inSeason) return false
+    if (filters.openForVisits && !v.inSeason) return false
     if (filters.hasActivities && !v.hasActivities) return false
     if (filters.wheelchairAccess && !v.wheelchairAccess) return false
     return true
@@ -123,7 +137,11 @@ export default function VisitorMapView() {
     setShowForm(false)
   }
 
-  const publicPlots = showPlots ? farmerPlots.filter((plot) => plot.public) : []
+  const publicPlots = showPlots ? farmerPlots.filter((plot) => {
+    if (!plot.public) return false
+    if (filters.plotsInSeason && !isPlotInSeason(plot)) return false
+    return true
+  }) : []
 
   return (
     <div className="map-container">
@@ -132,8 +150,11 @@ export default function VisitorMapView() {
         <button className={`filter-chip ${showPlots ? 'active' : ''}`} onClick={() => setShowPlots(!showPlots)}>
           {tr('showPlots' as TranslationKey, lang)}
         </button>
-        <button className={`filter-chip ${filters.inSeason ? 'active' : ''}`} onClick={() => toggle('inSeason')}>
-          {tr('filterInSeason', lang)}
+        <button className={`filter-chip ${filters.openForVisits ? 'active' : ''}`} onClick={() => toggle('openForVisits')}>
+          {tr('filterOpenVisits', lang)}
+        </button>
+        <button className={`filter-chip ${filters.plotsInSeason ? 'active' : ''}`} onClick={() => toggle('plotsInSeason')}>
+          {tr('filterPlotsInSeason', lang)}
         </button>
         <button className={`filter-chip ${filters.hasActivities ? 'active' : ''}`} onClick={() => toggle('hasActivities')}>
           {tr('filterActivities', lang)}
@@ -148,14 +169,15 @@ export default function VisitorMapView() {
         {publicPlots.map((plot) => {
           const village = villages.find((v) => v.id === plot.villageId)
           const months = getMonths(lang)
+          const inSeason = isPlotInSeason(plot)
 
           return (
             <Polygon
               key={plot.id}
               positions={simplifyPublicPoints(plot.points)}
               pathOptions={{
-                color: plot.inSeason ? '#4A7C2E' : '#999',
-                fillColor: plot.inSeason ? '#4A7C2E' : '#999',
+                color: inSeason ? '#4A7C2E' : '#999',
+                fillColor: inSeason ? '#4A7C2E' : '#999',
                 fillOpacity: 0.25,
                 weight: 2,
                 dashArray: '4 4',
@@ -176,7 +198,7 @@ export default function VisitorMapView() {
           <ResponsiveImage villageId={selected.id} villageName={selected.name} className="detail-photo" style={{ borderRadius: 'var(--radius-sm)' }} />
           <div className="detail-name">{selected.name}</div>
           <div className="detail-desc">{getDesc(selected, lang)}</div>
-          <span className={`badge ${selected.inSeason ? 'in-season' : 'off-season'}`}>{selected.inSeason ? tr('inSeason', lang) : tr('offSeason', lang)}</span>
+          <span className={`badge ${selected.inSeason ? 'in-season' : 'off-season'}`}>{selected.inSeason ? tr('openForVisits' as TranslationKey, lang) : tr('closedForVisits' as TranslationKey, lang)}</span>
 
           {avgRating && (
             <div className="review-summary">

@@ -1177,3 +1177,200 @@ button, select, input, textarea {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ── Mobile Responsive ──────────────────────────── */
+
+@media (max-width: 600px) {
+  .app-header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .app-header h1 {
+    font-size: 1rem;
+  }
+
+  .app-title img {
+    height: 24px !important;
+  }
+
+  .app-header > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .visitor-intro {
+    display: none;
+  }
+
+  .role-switcher {
+    flex: 1;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .role-switcher::-webkit-scrollbar {
+    display: none;
+  }
+
+  .role-btn {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+  }
+
+  .subtitle-bar {
+    flex-direction: column;
+    height: auto;
+    padding: 6px 12px;
+    gap: 2px;
+    align-items: flex-start;
+  }
+
+  .app-body {
+    height: calc(100% - 120px);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .form-screen {
+    padding: 12px 10px;
+  }
+
+  .form-screen h2 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .form-card {
+    padding: 14px 12px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .card-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .map-draw-area {
+    height: 240px;
+  }
+
+  .map-draw-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .map-draw-buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .activity-edit-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .toggle {
+    width: 48px;
+    height: 28px;
+  }
+
+  .toggle::after {
+    width: 22px;
+    height: 22px;
+  }
+
+  .toggle.on::after {
+    transform: translateX(20px);
+  }
+
+  .btn-primary {
+    padding: 12px;
+    font-size: 0.92rem;
+  }
+
+  .offline-sim {
+    padding: 10px 12px;
+  }
+
+  .dashboard {
+    padding: 12px 10px;
+  }
+
+  .dashboard h2 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .stat-cards {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 14px 10px;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+  }
+
+  .stat-label {
+    font-size: 0.78rem;
+  }
+
+  .chart-section,
+  .table-section,
+  .export-section {
+    padding: 14px 10px;
+  }
+
+  .bar-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .bar-label {
+    width: auto;
+    text-align: left;
+  }
+
+  .bar-track {
+    width: 100%;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+  }
+
+  .export-btn {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .audit-table {
+    font-size: 0.74rem;
+  }
+
+  .audit-table th,
+  .audit-table td {
+    padding: 6px 6px;
+  }
+
+  .audit-table code {
+    font-size: 0.68rem;
+  }
+
+  .screen-desc {
+    font-size: 0.82rem;
+  }
+}

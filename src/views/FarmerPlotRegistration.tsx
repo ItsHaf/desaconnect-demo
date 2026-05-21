@@ -89,6 +89,14 @@ function DraggableMarker({
   return <Marker draggable={true} eventHandlers={eventHandlers} position={position} icon={pointIcon} ref={markerRef} />
 }
 
+function isPlotInSeason(plot: { harvestStart: number; harvestEnd: number }): boolean {
+  const currentMonth = new Date().getMonth() + 1
+  const start = plot.harvestStart
+  const end = plot.harvestEnd
+  if (start <= end) return currentMonth >= start && currentMonth <= end
+  return currentMonth >= start || currentMonth <= end
+}
+
 export default function FarmerPlotRegistration() {
   const { lang } = useLang()
   const { plots, addPlot, removePlotsByFarmer, pendingPlots, addPendingPlot, syncPendingPlots, offlineMode, setOfflineMode } = usePlots()
@@ -104,18 +112,22 @@ export default function FarmerPlotRegistration() {
 
   const months = getMonths(lang)
 
-  const buildPlot = (): FarmerPlot => ({
-    id: Date.now(),
-    farmerId: 'farmer-me',
-    villageId: 0,
-    commodity,
-    commodityEn: COMMODITY_EN[commodity],
-    inSeason: true,
-    public: visibility === 'public',
-    harvestStart: Number(startMonth),
-    harvestEnd: Number(endMonth),
-    points: [...points],
-  })
+  const buildPlot = (): FarmerPlot => {
+    const plot: FarmerPlot = {
+      id: Date.now(),
+      farmerId: 'farmer-me',
+      villageId: 0,
+      commodity,
+      commodityEn: COMMODITY_EN[commodity],
+      inSeason: true,
+      public: visibility === 'public',
+      harvestStart: Number(startMonth),
+      harvestEnd: Number(endMonth),
+      points: [...points],
+    }
+    plot.inSeason = isPlotInSeason(plot)
+    return plot
+  }
 
   const ownPlots = plots.filter((plot) => plot.farmerId === 'farmer-me')
 
