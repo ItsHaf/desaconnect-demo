@@ -73,6 +73,79 @@ button, select, input, textarea {
   border-color: rgba(255,255,255,0.7);
 }
 
+.network-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(230, 74, 25, 0.92);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  animation: fadeInSlow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(230, 74, 25, 0.35);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.network-indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pulse 1.5s infinite;
+}
+
+.network-indicator-text {
+  white-space: nowrap;
+}
+
+.network-indicator-short {
+  display: none;
+}
+
+.network-sim-btn {
+  background: rgba(255,255,255,0.25);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 1px 5px;
+  line-height: 1;
+}
+
+.network-sim-btn:hover {
+  background: rgba(255,255,255,0.4);
+}
+
+.network-sim-toggle {
+  background: rgba(255,255,255,0.2);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 3px 7px;
+  line-height: 1;
+  transition: all 0.2s;
+}
+
+.network-sim-toggle:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.network-sim-toggle.active {
+  background: rgba(230, 74, 25, 0.8);
+  border-color: rgba(230, 74, 25, 0.9);
+}
+
+@keyframes fadeInSlow {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .role-switcher {
   display: flex;
   gap: 4px;
@@ -1198,7 +1271,8 @@ button, select, input, textarea {
 
   .app-header > div {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 8px;
   }
 
   .visitor-intro {
@@ -1206,7 +1280,9 @@ button, select, input, textarea {
   }
 
   .role-switcher {
-    flex: 1;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: calc(100% - 112px);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -1370,7 +1446,30 @@ button, select, input, textarea {
     font-size: 0.68rem;
   }
 
+  .network-indicator-text {
+    display: inline;
+  }
+
+  .network-indicator-short {
+    display: none;
+  }
+
+  .network-indicator {
+    padding: 5px 9px;
+    box-shadow: none;
+  }
+
   .screen-desc {
     font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .network-indicator-text {
+    display: none;
+  }
+
+  .network-indicator-short {
+    display: inline;
   }
 }

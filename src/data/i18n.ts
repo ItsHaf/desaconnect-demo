@@ -157,6 +157,9 @@ const t = {
   roleFarmer: { id: 'Petani', en: 'Farmer' },
   roleOfficer: { id: 'Officer', en: 'Officer' },
 
+  slowNetwork: { id: 'Jaringan Lambat', en: 'Slow Network' },
+  simulateSlow: { id: 'Simulasi Lambat', en: 'Simulate Slow' },
+
   roleDescVisitor: {
     id: '',
     en: 'Browse the map — no login needed',

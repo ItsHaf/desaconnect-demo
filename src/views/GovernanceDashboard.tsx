@@ -2,6 +2,7 @@ import { reviews } from '../data/mockData'
 import { useLang } from '../components/LangProvider'
 import { useVillages } from '../components/VillagesProvider'
 import { tr, type Lang, type TranslationKey } from '../data/i18n'
+import { useSlowNetwork } from '../App'
 
 function getTarget(entry: { targetId: string; targetEn: string }, lang: Lang) {
   return lang === 'en' ? entry.targetEn : entry.targetId
@@ -53,6 +54,7 @@ function exportReviewsCsv(allVillages: { id: number; name: string }[]) {
 export default function GovernanceDashboard() {
   const { lang } = useLang()
   const { villages, auditLog } = useVillages()
+  const { simulated, toggleSimulate } = useSlowNetwork()
 
   const top5 = [...villages].sort((a, b) => b.clickThroughs - a.clickThroughs).slice(0, 5)
   const maxClicks = top5[0]?.clickThroughs ?? 1
@@ -60,7 +62,17 @@ export default function GovernanceDashboard() {
 
   return (
     <div className="dashboard">
-      <h2>{tr('dashTitle', lang)}</h2>
+      <div className="card-header-row" style={{ marginBottom: 16 }}>
+        <h2 style={{ fontSize: '1.25rem', color: 'var(--green)', margin: 0 }}>{tr('dashTitle', lang)}</h2>
+        <button
+          className={`network-sim-toggle ${simulated ? 'active' : ''}`}
+          onClick={toggleSimulate}
+          title={tr('simulateSlow', lang)}
+        >
+          <img src="/slow-network.png" alt="" style={{ width: 16, height: 16, verticalAlign: 'middle' }} />
+          <span style={{ marginLeft: 4 }}>{tr('simulateSlow', lang)}</span>
+        </button>
+      </div>
       <p className="screen-desc">{tr('dashDesc', lang)}</p>
 
       <div className="stat-cards">
