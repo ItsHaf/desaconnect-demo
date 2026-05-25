@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Polygon, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Polygon, Popup, ZoomControl } from 'react-leaflet'
 import L from 'leaflet'
 import { useState } from 'react'
 import { reviews, type FarmerPlot, type Review, type Village } from '../data/mockData'
@@ -164,7 +164,8 @@ export default function VisitorMapView() {
         </button>
       </div>
 
-      <MapContainer center={[-7.7, 110.36]} zoom={12} zoomControl={true} style={{ height: '100%', width: '100%' }}>
+      <MapContainer center={[-7.7, 110.36]} zoom={12} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+        <ZoomControl position="bottomleft" />
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {publicPlots.map((plot) => {
           const village = villages.find((v) => v.id === plot.villageId)

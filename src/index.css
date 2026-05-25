@@ -330,7 +330,7 @@ button, select, input, textarea {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 900;
+  z-index: 1100;
   background: var(--card);
   border-radius: var(--radius) var(--radius) 0 0;
   box-shadow: var(--shadow-lg);
